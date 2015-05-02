@@ -33,7 +33,7 @@ app.get('/:table', function(req,res){
             });
         } else {
             // query the database using connection
-        	if(req.params.table.toLowerCase() == 'users'){
+        	if(req.params.table.toLowerCase() == 'events'){
 				//Construire une requete special qui recupère toutes les infos de la table event et aussi ajoute
 				//le nombre de personne inscrit à l'event et...à voir.
 
