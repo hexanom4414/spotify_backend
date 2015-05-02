@@ -33,7 +33,7 @@ app.get('/:table', function(req,res){
             });
         } else {
             // query the database using connection
-        	if(req.params.table.toLowerCase() == 'users'){
+        	if(req.params.table.toLowerCase() == 'events'){
 				//Construire une requete special qui recupère toutes les infos de la table event et aussi ajoute
 				//le nombre de personne inscrit à l'event et...à voir.
 
@@ -77,7 +77,7 @@ app.get('/:table/:id', function(req,res){
 				//le nombre de personne inscrit à l'event et...à voir.
 
         	}else{
-	            connection.query('SELECT * FROM '+req.params.table+' WHERE id = '+req.params.id+ '', function(err, rows, fields) {
+	            connection.query("SELECT * FROM "+req.params.table+" WHERE id = '"+req.params.id+ "'", function(err, rows, fields) {
 	                if (err) {
 	                    console.error(err);
 	                    res.statusCode = 500;
@@ -94,6 +94,42 @@ app.get('/:table/:id', function(req,res){
 	                });
 	                connection.release();
 	            });
+
+        	}
+        }
+    });
+});
+app.get('/events/:filter/:arg', function(req,res){
+	pool.getConnection(function(err, connection) {
+        if (err) {
+            console.error('CONNECTION error: ',err);
+            res.statusCode = 503;
+              res.send({
+                result: 'error',
+                err:    err.code
+            });
+        } else {
+            // query the database using connection
+			if(req.params.filter.toLowerCase() == 'sport'){
+				connection.query('SELECT * FROM events WHERE '+req.params.filter+" = '"+req.params.arg+ "'", function(err, rows, fields) {
+	                if (err) {
+	                    console.error(err);
+	                    res.statusCode = 500;
+	                    res.send({
+	                        result: 'error',
+	                        err:    err.code
+	                    });
+	                }
+	                res.send({
+	                    result: 'success',
+	                    err:    '',
+	                    json:   rows,
+	                    length: rows.length
+	                });
+	                connection.release();
+	            });
+        	}else{
+
 
         	}
         }
