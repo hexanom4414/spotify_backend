@@ -13,14 +13,10 @@ DELETE	/tableName/id	Delete the line with the specified _id
 **/
 
 app.get("/",function(req,res) {
-	res.send("bienvenue");
-	console.log("bienvenue");
 });
 
 app.get('/fetch/:table', function(req,res){
 	// res.setHeader({ 'Content-Type': 'application/json' });
-
-	database.listAnyTable(req,res);
 });
 
 app.get('/fetch/:table/:id', function(req,res){
