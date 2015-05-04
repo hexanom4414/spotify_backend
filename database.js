@@ -61,9 +61,9 @@ exports.addEvent = function(sport, field, date, callback){
 		} else {
 			var query ="";
 			if(date == null){
-				query = 'INSERT INTO '+events+'(installationSportive,sport) VALUES('+field+','+sport+')';
+				query = "INSERT INTO "+events+" (installationSportive,sport) VALUES ('"+field+"','"+sport+"')";
 			}else{
-				query = 'INSERT INTO '+events+'(installationSportive,sport,date) VALUES('+field+','+sport+','+date+')';
+				query = "INSERT INTO "+events+" (installationSportive,sport,date) VALUES ('"+field+"','"+sport+"','"+date+"')";
 			}
 			connection.query(query, function(err, rows, fields) {
 				if (err) {

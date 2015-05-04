@@ -4,6 +4,8 @@ var express    = require('express'),
 	app        = express(),
 	port       = 8080;
 
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
+
 var events = "events",
 	fields = "fields",
 	sports = "sports",
@@ -20,10 +22,10 @@ app.get("/",function(req,res) {
 	res.send("Bienvenue sur SportifyWS bitchies");
 })
 
-.use( bodyParser.json() )       // to support JSON-encoded bodies
-.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
-}))
+// .use( bodyParser.json() )       // to support JSON-encoded bodies
+// .use(bodyParser.urlencoded({     // to support URL-encoded bodies
+//   extended: true
+// }))
 
 
 /***********************  METHOD REST  ****************************\
@@ -72,15 +74,16 @@ DELETE	/tableName/id	Delete the line with the specified _id
 		}
 	})
 })
-.post('/:table', function(req,res){
+.post('/:table', urlencodedParser, function(req,res){
 	switch(req.params.table){
 		case users:
 			// database.addUser();
 			break;
 		case events:
+		console.log(req.body);
 			var sport = req.body.sport,
 				field = req.body.field,
-				date  = req.body.date ? null : new Date(req.body.date);
+				date  = req.body.date ? Math.round(new Date().getTime() / 1000) : Math.round(new Date(req.body.date).getTime() / 1000);;
 
 			database.addEvent(sport,field,date,function(err,data){
 				if(err){
