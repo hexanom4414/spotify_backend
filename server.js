@@ -23,6 +23,7 @@ DELETE	/tableName/id	Delete the line with the specified _id
 
 app.get('/:table', function(req,res){
 	// res.setHeader({ 'Content-Type': 'application/json' });
+	console.log("hello");
 	pool.getConnection(function(err, connection) {
         if (err) {
             console.error('CONNECTION error: ',err);
