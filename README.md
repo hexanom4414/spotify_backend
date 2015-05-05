@@ -1,5 +1,5 @@
 # spotify_backend
-BackEnd du projet Spotify
+BackEnd du projet SpoRtify
 
 Lancement nodejs via forever :
 sudo forever start /home/h4414/spotify_backend/new_server.js
