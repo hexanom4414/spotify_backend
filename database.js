@@ -16,22 +16,22 @@ var events = "events",
 	users  = "users";
 
 function errorConnection(err,data,callback){
-	console.error('CONNECTION error: ',err);	//for console debugging
+	console.log('CONNECTION error: ',err);	//for console debugging
 
 	var error = new Error("CONNEXION error: ",err); //implement a code error for callback function
 	data.statusCode = 503;
-	error.code = err.code;
+	// error.code = err.code;
 
 	callback(error,data);	//This remplace "return" in javascript, in the nodeJs convention
 							//we have to make a callback function with err and data in parameters.
 }
 
 function errorQuery(err,data,callback){
-	console.error("QUERY error: ",err);
+	console.log("QUERY error: ",err);
 
 	var error = new Error("QUERY error: ",err);
 	data.statusCode = 500;
-	error.code = err.code;
+	// error.code = err.code;
 	callback(error,data);
 }
 
@@ -129,6 +129,7 @@ exports.fetchElementById = function (table,id , callback){
 
 exports.createUser = function (u_firstname,u_lastname, callback){
 	var data = {};
+	var create =false;
 
 	var requete_get_user="SELECT * FROM "+users+''+" WHERE firstname = '"+u_firstname+ "'" + " AND lastname = '"+u_lastname+"' ";
 	pool.getConnection(function(err, connection) {
@@ -136,52 +137,48 @@ exports.createUser = function (u_firstname,u_lastname, callback){
 			errorConnection(err,data,function(err,data){callback(err,data);})
 
 		} else {
-			var create =false;
-			connection.query(requete_get_user, function(err, rows, fields) {
+
+			var query = connection.query(requete_get_user, function(err, rows, fields) {
 				if (err) {
 					errorQuery(err,data,function(err,data){callback(error,data);});
 				} else{
-					if (!rows){
+					console.log(rows.length);
+					if (rows.length==0){
 						create =true;
 					}
 					connection.release();
 				}
+
 			});
-			if (create){
 
-				if (!Max_id){
-					connection.query( 'SELECT MAX(id) FROM '+users+'', function(err, rows, fields) {
+			query.on('end', function(rows){
+				// connection.release();
+
+				pool.getConnection(function(err, connection) {
 					if (err) {
-						errorQuery(err,data,function(err,data){callback(error,data);});
-					} else{
-						Max_id=	rows[0]+1;
-						console.log("----------------"+Max_id+"----------------");
-					}
-					connection.release();
-					callback(null,data);
-				});
+						errorConnection(err,data,function(err,data){callback(err,data);})
 
-				}else{Max_id++;}
+					} else {
+						if (create){
 
-				var request_insert_user="INSERT INTO users (id, firstname, lastname ) VALUES(" +Max_id+", '"+u_firstname+"' ,‘"+u_lastname+"')";
-				console.log("----------------"+request_insert_user+"----------------");
-				connection.query(request_insert_user, function(err, rows, fields) {
-					if (err) {
-						errorQuery(err,data,function(err,data){callback(error,data);})
-					} else{
-						data.rows = rows;
-						data.length = rows.length;
-						connection.release();
-
-						connection.release();
-						callback(null,data);
+							var request_insert_user="INSERT INTO users ( firstname, lastname ) VALUES('"+u_firstname+"' ,'"+u_lastname+"')";
+							console.log("----------------"+request_insert_user+"----------------");
+							connection.query(request_insert_user, function(err, rows, fields) {
+								if (err) {
+									errorQuery(err,data,function(err,data){callback(error,data);})
+								} else{
+									connection.release();
+									callback(null,data);
+								}
+							});
+						}else{
+							var error = new Error("USER ALREADY IN DATABASE");
+							callback(error,data);
+						}
 					}
 				});
-			}else{
-				var error = new Error("USER EXITE: ");
-				callback(error,data);
-			}
 
+			});
 
 		}
 	});
