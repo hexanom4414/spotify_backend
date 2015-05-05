@@ -17,7 +17,7 @@ function errorConnection(err,data,callback){
 
 	var error = new Error("CONNEXION error: ",err); //implement a code error for callback function
 	data.statusCode = 503;
-	error.prototype.code = err.code;
+	error.code = err.code;
 
 	callback(error,data);	//This remplace "return" in javascript, in the nodeJs convention
 							//we have to make a callback function with err and data in parameters.
@@ -37,7 +37,7 @@ exports.fetchTable = function (table , callback){
 
 					var error = new Error("QUERY error: ",err);
 					data.statusCode = 500;
-					error.prototype.code = err.code;
+					error.code = err.code;
 
 					callback(error,data);
 				} else{
@@ -71,7 +71,7 @@ exports.addEvent = function(sport, field, date, callback){
 
 					var error = new Error("QUERY error: ",err);
 					data.statusCode = 500;
-					// error.prototype.code = err.code;
+					error.code = err.code;
 
 					callback(error,data);
 				} else{
@@ -96,7 +96,30 @@ exports.fetchFilteredEvents = function(filter,arg){
 
 					var error = new Error("QUERY error: ",err);
 					data.statusCode = 500;
-					error.prototype.code = err.code;
+					error.code = err.code ;
+					callback(error,data);
+				}else {
+					data.rows = rows;
+					data.length = rows.length;
+					connection.release();
+					callback(null,data);
+				}
+			});
+		}
+	});
+};
+
+exports.fetchElementById = function (table,id , callback){
+	pool.getConnection(function(err, connection) {
+		if (err) {
+			errorConnection(err,data,function(err,data){callback(err,data);})
+		} else {
+			connection.query("SELECT * FROM "+table+" WHERE id = '"+id+ "'", function(err, rows, fields) {
+				if (err) {
+					var error = new Error("QUERY error: ",err);
+					data.statusCode = 500;
+					error.code = err.code ;
+					callback(error,data);
 				}else {
 					data.rows = rows;
 					data.length = rows.length;

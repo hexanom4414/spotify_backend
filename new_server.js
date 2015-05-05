@@ -19,7 +19,7 @@ app.get("/",function(req,res) {
 	// res.end('');
 	var error = new Error("hello");
 	console.log(error);
-	res.send("Bienvenue sur SportifyWS bitchies");
+	res.send("Bienvenue sur SportifyWS");
 })
 
 // .use( bodyParser.json() )       // to support JSON-encoded bodies
@@ -55,7 +55,24 @@ DELETE	/tableName/id	Delete the line with the specified _id
 	});
 
 })
-.get('/fetch/:table/:id', function(req,res){})
+.get('/fetch/:table/:id', function(req,res){
+	var table = req.params.table,
+		id    = req.params.id;
+
+	database.fetchElementById(table,id,function(err,data){
+		if(err){
+			res.statusCode = data.statusCode;
+			res.send({
+				success: false,
+				err:    err.code
+			});
+		}else{
+			res.send({
+				success: true
+			});
+		}
+	});
+})
 .get('/fetch/events/:filter/:arg', function(req,res){
 	var filter = req.params.filter,
 		arg    = req.params.arg;
@@ -72,7 +89,7 @@ DELETE	/tableName/id	Delete the line with the specified _id
 				success: true
 			});
 		}
-	})
+	});
 })
 .post('/:table', urlencodedParser, function(req,res){
 	switch(req.params.table){
@@ -83,7 +100,7 @@ DELETE	/tableName/id	Delete the line with the specified _id
 		console.log(req.body);
 			var sport = req.body.sport,
 				field = req.body.field,
-				date  = req.body.date ? Math.round(new Date().getTime() / 1000) : Math.round(new Date(req.body.date).getTime() / 1000);;
+				date  = req.body.date ? new Date().now() : new Date(req.body.date).getTime() ;
 
 			database.addEvent(sport,field,date,function(err,data){
 				if(err){
