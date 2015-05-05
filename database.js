@@ -22,6 +22,16 @@ function errorConnection(err,data,callback){
 	callback(error,data);	//This remplace "return" in javascript, in the nodeJs convention
 							//we have to make a callback function with err and data in parameters.
 }
+
+function errorQuery(err,data,callback){
+	console.error("QUERY error: ",err);
+
+	var error = new Error("QUERY error: ",err);
+	data.statusCode = 500;
+	error.code = err.code;
+	callback(error,data);
+}
+
 //* In case of error with the database. The module myqsql give us some err and err.code we can use
 exports.fetchTable = function (table , callback){
 	var data = {};
@@ -33,13 +43,7 @@ exports.fetchTable = function (table , callback){
 
 			connection.query('SELECT * FROM '+table+'', function(err, rows, fields) {
 				if (err) {
-					console.error("QUERY error: ",err);
-
-					var error = new Error("QUERY error: ",err);
-					data.statusCode = 500;
-					error.code = err.code;
-
-					callback(error,data);
+					errorQuery(err,data,function(err,data){callback(error,data);})
 				} else{
 					data.rows = rows;
 					data.length = rows.length;
@@ -67,13 +71,7 @@ exports.addEvent = function(sport, field, date, callback){
 			}
 			connection.query(query, function(err, rows, fields) {
 				if (err) {
-					console.error("QUERY error: ",err);
-
-					var error = new Error("QUERY error: ",err);
-					data.statusCode = 500;
-					error.code = err.code;
-
-					callback(error,data);
+					errorQuery(err,data,function(err,data){callback(error,data);})
 				} else{
 					// data.rows = rows;
 					// data.length = rows.length;
@@ -92,12 +90,7 @@ exports.fetchFilteredEvents = function(filter,arg){
 		} else {
 			connection.query("SELECT * FROM "+events+" WHERE "+filter+" = '"+arg+ "'", function(err, rows, fields) {
 				if (err) {
-					console.error("QUERY error: ",err);
-
-					var error = new Error("QUERY error: ",err);
-					data.statusCode = 500;
-					error.code = err.code ;
-					callback(error,data);
+					errorQuery(err,data,function(err,data){callback(error,data);})
 				}else {
 					data.rows = rows;
 					data.length = rows.length;
@@ -116,10 +109,7 @@ exports.fetchElementById = function (table,id , callback){
 		} else {
 			connection.query("SELECT * FROM "+table+" WHERE id = '"+id+ "'", function(err, rows, fields) {
 				if (err) {
-					var error = new Error("QUERY error: ",err);
-					data.statusCode = 500;
-					error.code = err.code ;
-					callback(error,data);
+					errorQuery(err,data,function(err,data){callback(error,data);})
 				}else {
 					data.rows = rows;
 					data.length = rows.length;
