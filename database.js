@@ -12,7 +12,8 @@ var Max_id ;
 
 var events = "events",
 	fields = "fields",
-	sports = "sports";
+	sports = "sports",
+	users  = "users";
 
 function errorConnection(err,data,callback){
 	console.error('CONNECTION error: ',err);	//for console debugging
@@ -45,7 +46,7 @@ exports.fetchTable = function (table , callback){
 
 			connection.query('SELECT * FROM '+table+'', function(err, rows, fields) {
 				if (err) {
-					errorQuery(err,data,function(err,data){callback(error,data);})
+					errorQuery(err,data,function(err,data){callback(error,data);});
 				} else{
 					data.rows = rows;
 					data.length = rows.length;
@@ -63,7 +64,7 @@ exports.addEvent = function(sport, field, date, callback){
 	console.log(date);
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			errorConnection(err,data,function(err,data){callback(err,data);})
+			errorConnection(err,data,function(err,data){callback(err,data);});
 		} else {
 			var query ="";
 			if(date == null){
@@ -73,7 +74,7 @@ exports.addEvent = function(sport, field, date, callback){
 			}
 			connection.query(query, function(err, rows, fields) {
 				if (err) {
-					errorQuery(err,data,function(err,data){callback(error,data);})
+					errorQuery(err,data,function(err,data){callback(error,data);});
 				} else{
 					// data.rows = rows;
 					// data.length = rows.length;
@@ -86,13 +87,14 @@ exports.addEvent = function(sport, field, date, callback){
 	});
 };
 exports.fetchFilteredEvents = function(filter,arg){
+	var data = {};
 	pool.getConnection(function(err, connection) {
 		if (err) {
 			errorConnection(err,data,function(err,data){callback(err,data);})
 		} else {
 			connection.query("SELECT * FROM "+events+" WHERE "+filter+" = '"+arg+ "'", function(err, rows, fields) {
 				if (err) {
-					errorQuery(err,data,function(err,data){callback(error,data);})
+					errorQuery(err,data,function(err,data){callback(error,data);});
 				}else {
 					data.rows = rows;
 					data.length = rows.length;
@@ -105,13 +107,15 @@ exports.fetchFilteredEvents = function(filter,arg){
 };
 
 exports.fetchElementById = function (table,id , callback){
+	var data = {};
+
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			errorConnection(err,data,function(err,data){callback(err,data);})
+			errorConnection(err,data,function(err,data){callback(err,data);});
 		} else {
 			connection.query("SELECT * FROM "+table+" WHERE id = '"+id+ "'", function(err, rows, fields) {
 				if (err) {
-					errorQuery(err,data,function(err,data){callback(error,data);})
+					errorQuery(err,data,function(err,data){callback(error,data);});
 				}else {
 					data.rows = rows;
 					data.length = rows.length;
@@ -123,86 +127,62 @@ exports.fetchElementById = function (table,id , callback){
 	});
 };
 
-exports.createUser = function (req,res){
-	var u_firstname =req.body.firstname;
-	var	u_lastname =req.body.lastname;
-	var requete_get_user="SELECT * FROM "+req.params.table+''+" WHERE firstname = '"+u_firstname+ "'" + " AND lastname = '"+u_lastname+"' ";
+exports.createUser = function (u_firstname,u_lastname, callback){
+	var data = {};
+
+	var requete_get_user="SELECT * FROM "+users+''+" WHERE firstname = '"+u_firstname+ "'" + " AND lastname = '"+u_lastname+"' ";
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			console.error('CONNECTION error: ',err);
-			res.statusCode = 503;
-			res.send({
-				result: 'error',
-				err:    err.code
-			});
+			errorConnection(err,data,function(err,data){callback(err,data);})
+
 		} else {
-				var create =false;
-				connection.query(requete_get_user, function(err, rows, fields) {
-					if (!err) {
-						console.error(err);
-						res.statusCode = 500;
-						res.send({
-							result: 'error',
-							err:    err.code
-						});
-					} else{
-						if (!rows){
-							create =true;
-						}		
+			var create =false;
+			connection.query(requete_get_user, function(err, rows, fields) {
+				if (err) {
+					errorQuery(err,data,function(err,data){callback(error,data);});
+				} else{
+					if (!rows){
+						create =true;
 					}
-						connection.release();
-				});
-				if (create){
-
-					if (!Max_id){
-						connection.query( 'SELECT MAX(id) FROM '+req.params.table+'', function(err, rows, fields) {
-											if (!err) {
-												console.error(err);
-												res.statusCode = 500;
-												res.send({
-													result: 'error',
-													err:    err.code
-												});
-											} else{
-												Max_id=	rows[0]+1;
-												console.log("----------------"+Max_id+"----------------");
-											}
-												connection.release();
-										});
-
-					}else{Max_id++;}
-
-					var request_insert_user="INSERT INTO users (id, firstname, lastname ) VALUES(" +Max_id+", '"+u_firstname+"' ,‘"+u_lastname+"')";
-					console.log("----------------"+request_insert_user+"----------------");
-					connection.query(request_insert_user, function(err, rows, fields) {
-					if (!err) {
-						console.error(err);
-						res.statusCode = 500;
-						res.send({
-							result: 'error',
-							err:    err.code
-						});
-					} else{
-							res.send({
-							result: 'success',
-							err:    '',
-							json:  null,
-							length: 0
-							});	
-					}
-						connection.release();
-				});
-				}else{
-
-							res.send({
-							result: 'error',
-							err:    'USER EXITE',
-							json:   null,
-							length: 0
-							});
+					connection.release();
 				}
-				
-			
+			});
+			if (create){
+
+				if (!Max_id){
+					connection.query( 'SELECT MAX(id) FROM '+users+'', function(err, rows, fields) {
+					if (err) {
+						errorQuery(err,data,function(err,data){callback(error,data);});
+					} else{
+						Max_id=	rows[0]+1;
+						console.log("----------------"+Max_id+"----------------");
+					}
+					connection.release();
+					callback(null,data);
+				});
+
+				}else{Max_id++;}
+
+				var request_insert_user="INSERT INTO users (id, firstname, lastname ) VALUES(" +Max_id+", '"+u_firstname+"' ,‘"+u_lastname+"')";
+				console.log("----------------"+request_insert_user+"----------------");
+				connection.query(request_insert_user, function(err, rows, fields) {
+					if (err) {
+						errorQuery(err,data,function(err,data){callback(error,data);})
+					} else{
+						data.rows = rows;
+						data.length = rows.length;
+						connection.release();
+
+						connection.release();
+						callback(null,data);
+					}
+				});
+			}else{
+				var error = new Error("USER EXITE: ");
+				callback(error,data);
+			}
+
+
 		}
 	});
 

@@ -94,10 +94,25 @@ DELETE	/tableName/id	Delete the line with the specified _id
 .post('/:table', urlencodedParser, function(req,res){
 	switch(req.params.table){
 		case users:
-			// database.addUser();
+			var u_firstname =req.body.firstname;
+			var	u_lastname =req.body.lastname;
+
+			database.createUser(u_firstname,u_lastname, function(err,data){
+				if(err){
+					res.statusCode = data.statusCode;
+					res.send({
+						success: false,
+						err:    err.code
+					});
+				}else{
+					res.send({
+						success: true
+					});
+				}
+			});
 			break;
 		case events:
-		console.log(req.body);
+			console.log(req.body);
 			var sport = req.body.sport,
 				field = req.body.field,
 				date  = req.body.date ? new Date().now() : new Date(req.body.date).getTime() ;
