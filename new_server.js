@@ -6,10 +6,10 @@ var express    = require('express'),
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
-var events = "events",
-	fields = "fields",
-	sports = "sports",
-	users  = "users";
+var events = "evenenement",
+	fields = "installationSportive",
+	sports = "sport",
+	users  = "utilisateur";
 
 app.use(express.static(__dirname+"/public"));
 app.set('view engine', 'ejs');
@@ -18,7 +18,10 @@ app.get("/",function(req,res) {
 	// res.render("index.js");
 	// res.end('');
 	var error = new Error("hello");
-	console.log(error);
+	var filter = req.query.filter;
+	var arg = req.query.arg;
+	console.log(filter);
+	console.log(arg);
 	res.send("Bienvenue sur SportifyWS");
 })
 
@@ -73,11 +76,12 @@ DELETE	/tableName/id	Delete the line with the specified _id
 		}
 	});
 })
-.get('/fetch/events/:filter/:arg', function(req,res){
-	var filter = req.params.filter,
+.get('/fetch/:table/:filter/:arg', function(req,res){
+	var table  = req.params.filter,
+		filter = req.params.filter,
 		arg    = req.params.arg;
 
-	database.fetchFilteredEvents(filter,arg,function(err,data){
+	database.fetchFilteredTable(table,filter,arg,function(err,data){
 		if(err){
 			res.statusCode = data.statusCode;
 			res.send({
@@ -113,11 +117,12 @@ DELETE	/tableName/id	Delete the line with the specified _id
 			break;
 		case events:
 			console.log(req.body);
-			var sport = req.body.sport,
+			var table = req.params.table,
+				sport = req.body.sport,
 				field = req.body.field,
 				date  = req.body.date ? new Date().now() : new Date(req.body.date).getTime() ;
 
-			database.addEvent(sport,field,date,function(err,data){
+			database.addEvent(table,sport,field,date,function(err,data){
 				if(err){
 					res.statusCode = data.statusCode;
 					res.send({

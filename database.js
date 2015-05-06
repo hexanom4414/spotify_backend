@@ -3,17 +3,17 @@ var pool    = mysql.createPool({
 	connectionLimit : 1000, //important, we have to test the resistance.
 	host     : 'localhost',
 	user     : 'root',
-	password : '',
+	password : 'sportify!',
 	database : 'sportify',
 	debug    :  true
 });
 
 var Max_id ;
 
-var events = "events",
-	fields = "fields",
-	sports = "sports",
-	users  = "users";
+var events = "evenement",
+	fields = "installationSportive",
+	sports = "sport",
+	users  = "utilisateur";
 
 function errorConnection(err,data,callback){
 	console.log('CONNECTION error: ',err);	//for console debugging
@@ -59,7 +59,7 @@ exports.fetchTable = function (table , callback){
 	});
 };
 
-exports.addEvent = function(sport, field, date, callback){
+exports.addEvent = function(table,sport, field, date, callback){
 	var data = {};
 	console.log(date);
 	pool.getConnection(function(err, connection) {
@@ -68,9 +68,9 @@ exports.addEvent = function(sport, field, date, callback){
 		} else {
 			var query ="";
 			if(date == null){
-				query = "INSERT INTO "+events+" (installationSportive,sport) VALUES ('"+field+"','"+sport+"')";
+				query = "INSERT INTO "+table+" (installationSportive,sport) VALUES ('"+field+"','"+sport+"')";
 			}else{
-				query = "INSERT INTO "+events+" (installationSportive,sport,date) VALUES ('"+field+"','"+sport+"','"+date+"')";
+				query = "INSERT INTO "+table+" (installationSportive,sport,date) VALUES ('"+field+"','"+sport+"','"+date+"')";
 			}
 			connection.query(query, function(err, rows, fields) {
 				if (err) {
@@ -86,13 +86,13 @@ exports.addEvent = function(sport, field, date, callback){
 		}
 	});
 };
-exports.fetchFilteredEvents = function(filter,arg){
+exports.fetchFilteredTable = function(table,filter,arg){
 	var data = {};
 	pool.getConnection(function(err, connection) {
 		if (err) {
 			errorConnection(err,data,function(err,data){callback(err,data);})
 		} else {
-			connection.query("SELECT * FROM "+events+" WHERE "+filter+" = '"+arg+ "'", function(err, rows, fields) {
+			connection.query("SELECT * FROM "+table+" WHERE "+filter+" = '"+arg+ "'", function(err, rows, fields) {
 				if (err) {
 					errorQuery(err,data,function(err,data){callback(error,data);});
 				}else {
