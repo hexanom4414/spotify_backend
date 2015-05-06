@@ -66,8 +66,8 @@ exports.addEvent = function(table,sport, field, date, email, callback){
 		if (err) {
 			errorConnection(err,data,function(err,data){callback(err,data);});
 		} else {
-			var sQuery1 "";
-			var sQuery2 "SELECT id FROM utilisateur WHERE email ="+email;
+			var sQuery1 ="";
+			var sQuery2 ="SELECT id FROM utilisateur WHERE email ="+email;
 
 			var userId;
 			var eventId;
