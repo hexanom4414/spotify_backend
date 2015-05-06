@@ -2,7 +2,7 @@ var express    = require('express'),
 	bodyParser = require('body-parser'),
 	database   = require("./database.js"),
 	app        = express(),
-	port       = 8080;
+	port       = 80;
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
