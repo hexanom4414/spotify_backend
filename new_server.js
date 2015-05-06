@@ -98,10 +98,11 @@ DELETE	/tableName/id	Delete the line with the specified _id
 .post('/:table', urlencodedParser, function(req,res){
 	switch(req.params.table){
 		case users:
-			var u_firstname =req.body.firstname;
-			var	u_lastname =req.body.lastname;
+			var u_email     = req.body.email,
+				u_firstname = req.body.firstname,
+				u_lastname  = req.body.lastname;
 
-			database.createUser(u_firstname,u_lastname, function(err,data){
+			database.createUser(u_email,u_firstname,u_lastname, function(err,data){
 				if(err){
 					res.statusCode = data.statusCode;
 					res.send({
@@ -117,10 +118,10 @@ DELETE	/tableName/id	Delete the line with the specified _id
 			break;
 		case events:
 			console.log(req.body);
-			var table = req.params.table,
-				sport = req.body.sport,
-				field = req.body.field,
-				date  = req.body.date ? new Date().now() : new Date(req.body.date).getTime() ;
+			var sport     = req.body.sportId,
+				field     = req.body.fieldId,
+				date      = req.body.date ? new Date().now() : new Date(req.body.date).getTime(),
+				emailUser = req.body.email ;
 
 			database.addEvent(table,sport,field,date,function(err,data){
 				if(err){

@@ -59,28 +59,52 @@ exports.fetchTable = function (table , callback){
 	});
 };
 
-exports.addEvent = function(table,sport, field, date, callback){
+exports.addEvent = function(table,sport, field, date, email, callback){
 	var data = {};
 	console.log(date);
 	pool.getConnection(function(err, connection) {
 		if (err) {
 			errorConnection(err,data,function(err,data){callback(err,data);});
 		} else {
-			var query ="";
+			var sQuery1 "";
+			var sQuery2 "SELECT id FROM utilisateur WHERE email ="+email;
+
+			var userId;
+			var eventId;
 			if(date == null){
-				query = "INSERT INTO "+table+" (installationSportive,sport) VALUES ('"+field+"','"+sport+"')";
+				sQuery1 = "INSERT INTO "+table+" (sportId, installationId, email_createur) \
+				 VALUES ( '"+sport+"','"+field+"','"+email+"')"
 			}else{
-				query = "INSERT INTO "+table+" (installationSportive,sport,date) VALUES ('"+field+"','"+sport+"','"+date+"')";
+				sQuery1 = "INSERT INTO "+table+" (sportId, installationId, date_evenement, email_createur) \
+				VALUES ('"+sport+"','"+field+"','"+date+"','"+email+"')";
 			}
-			connection.query(query, function(err, rows, fields) {
-				if (err) {
+			var query = connection.query(sQuery1+";"+sQuery2);
+			query.on('error', function(err) {
 					errorQuery(err,data,function(err,data){callback(error,data);});
-				} else{
-					// data.rows = rows;
-					// data.length = rows.length;
-					connection.release();
-					callback(null,data);
-				}
+			});
+			query.on('result',function(row){
+				eventId = row[0].insertId;
+				userId  = row[1].insertId;
+			});
+			query.on('end',function(rows){
+
+				pool.getConnection(function(err, connection) {
+					if (err) {
+						errorConnection(err,data,function(err,data){callback(err,data);})
+					} else {
+						var sQuery ="INSERT INTO jonction_evenement_utilisateur(utilisateurId, evenementId) \
+						VALUES ("+userId+","+eventId+")";
+
+						connection.query(sQuery,function(err,rows,fields){
+							if (err) {
+								errorQuery(err,data,function(err,data){callback(error,data);});
+							}else {
+								connection.release();
+								callback(null,data);
+							}
+						});
+					}
+				});
 			});
 
 		}
@@ -127,11 +151,12 @@ exports.fetchElementById = function (table,id , callback){
 	});
 };
 
-exports.createUser = function (u_firstname,u_lastname, callback){
+exports.createUser = function (email,firstname,lastname, callback){
 	var data = {};
 	var create =false;
 
-	var requete_get_user="SELECT * FROM "+users+''+" WHERE firstname = '"+u_firstname+ "'" + " AND lastname = '"+u_lastname+"' ";
+	var requete_get_user="SELECT * FROM "+users+''+"\
+	 WHERE nom = '"+firstname+ "'" + " AND prenom = '"+lastname+"'" + " AND email = '"+email+"'";
 	pool.getConnection(function(err, connection) {
 		if (err) {
 			errorConnection(err,data,function(err,data){callback(err,data);})
@@ -161,7 +186,8 @@ exports.createUser = function (u_firstname,u_lastname, callback){
 					} else {
 						if (create){
 
-							var request_insert_user="INSERT INTO users ( firstname, lastname ) VALUES('"+u_firstname+"' ,'"+u_lastname+"')";
+							var request_insert_user="INSERT INTO utilisateur (email, nom, prenom) \
+							VALUES ('"+email+"' ,'"+nom+"','"+prenom+"')";
 							console.log("----------------"+request_insert_user+"----------------");
 							connection.query(request_insert_user, function(err, rows, fields) {
 								if (err) {
