@@ -153,61 +153,108 @@ exports.fetchElementById = function (table,id , callback){
 
 exports.createUser = function (email,firstname,lastname, callback){
 	var data = {};
-	var create =false;
-
-	var requete_get_user="SELECT * FROM "+users+''+"\
-	 WHERE nom = '"+firstname+ "'" + " AND prenom = '"+lastname+"'" + " AND email = '"+email+"'";
 	pool.getConnection(function(err, connection) {
 		if (err) {
-			errorConnection(err,data,function(err,data){callback(err,data);})
-
+			errorConnection(err,data,function(err,data){callback(err,data);});
 		} else {
+			var sQuery1 ="";
+			var sQuery2 ="SELECT * FROM utilisateur WHERE email ="+email;
 
-			var query = connection.query(requete_get_user, function(err, rows, fields) {
-				if (err) {
+			var q2_result;
+			sQuery1 = "INSERT INTO utilisateur (email, nom, prenom) \	VALUES ('"+email+"' ,'"+firstname+"','"+lastname+"')";
+			
+			var query = connection.query(sQuery2);
+			query.on('error', function(err) {
 					errorQuery(err,data,function(err,data){callback(error,data);});
-				} else{
-					console.log(rows.length);
-					if (rows.length==0){
-						create =true;
-					}
-					connection.release();
-				}
+			});
+			query.on('result', function(row) {
+					q2_result=row;
 
 			});
+			query.on('end',function(rows){
+				if(!q2_result){
+					var error = new Error("USER ALREADY IN DATABASE");
+					callback(error,data);
 
-			query.on('end', function(rows){
-				// connection.release();
+				}else{
+					pool.getConnection(function(err, connection) {
+						if (err) {
+							errorConnection(err,data,function(err,data){callback(err,data);})
+						} else {
 
-				pool.getConnection(function(err, connection) {
-					if (err) {
-						errorConnection(err,data,function(err,data){callback(err,data);})
-
-					} else {
-						if (create){
-
-							var request_insert_user="INSERT INTO utilisateur (email, nom, prenom) \
-							VALUES ('"+email+"' ,'"+nom+"','"+prenom+"')";
-							console.log("----------------"+request_insert_user+"----------------");
-							connection.query(request_insert_user, function(err, rows, fields) {
+							console.log("______________USERS Creeeeated______________");
+							connection.query(sQuery1,function(err,rows,fields){
 								if (err) {
-									errorQuery(err,data,function(err,data){callback(error,data);})
-								} else{
+									console.log("____________  error db__________");
+									errorQuery(err,data,function(err,data){callback(error,data);});
+								}else {
 									connection.release();
 									callback(null,data);
 								}
 							});
-						}else{
-							var error = new Error("USER ALREADY IN DATABASE");
-							callback(error,data);
 						}
-					}
-				});
-
+					});
+				}
 			});
 
 		}
 	});
+	
+	// var create =false;
+
+	// var requete_get_user="SELECT * FROM "+users+''+"\
+	//  WHERE nom = '"+firstname+ "'" + " AND prenom = '"+lastname+"'" + " AND email = '"+email+"'";
+	// pool.getConnection(function(err, connection) {
+	// 	if (err) {
+	// 		errorConnection(err,data,function(err,data){callback(err,data);})
+
+	// 	} else {
+
+	// 		var query = connection.query(requete_get_user, function(err, rows, fields) {
+	// 			if (err) {
+	// 				errorQuery(err,data,function(err,data){callback(error,data);});
+	// 			} else{
+	// 				console.log(rows.length);
+	// 				if (rows.length==0){
+	// 					create =true;
+	// 				}
+	// 				connection.release();
+	// 			}
+
+	// 		});
+
+	// 		query.on('end', function(rows){
+	// 			// connection.release();
+
+	// 			pool.getConnection(function(err, connection) {
+	// 				if (err) {
+	// 					errorConnection(err,data,function(err,data){callback(err,data);})
+
+	// 				} else {
+	// 					if (create){
+
+	// 						var request_insert_user="INSERT INTO utilisateur (email, nom, prenom) \
+	// 						VALUES ('"+email+"' ,'"+nom+"','"+prenom+"')";
+	// 						console.log("----------------"+request_insert_user+"----------------");
+	// 						connection.query(request_insert_user, function(err, rows, fields) {
+	// 							if (err) {
+	// 								errorQuery(err,data,function(err,data){callback(error,data);})
+	// 							} else{
+	// 								connection.release();
+	// 								callback(null,data);
+	// 							}
+	// 						});
+	// 					}else{
+	// 						var error = new Error("USER ALREADY IN DATABASE");
+	// 						callback(error,data);
+	// 					}
+	// 				}
+	// 			});
+
+	// 		});
+
+	// 	}
+	// });
 
 };
 
