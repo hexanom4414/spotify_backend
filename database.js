@@ -172,7 +172,7 @@ exports.createUser = function (email,firstname,lastname, callback){
 
 			});
 			query.on('end',function(rows){
-				if(!q2_result){
+				if(false){
 					var error = new Error("USER ALREADY IN DATABASE");
 					callback(error,data);
 
