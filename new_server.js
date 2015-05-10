@@ -71,7 +71,9 @@ DELETE	/tableName/id	Delete the line with the specified _id
 			});
 		}else{
 			res.send({
-				success: true
+				success: true,
+				data:   data.rows,
+				length: data.length
 			});
 		}
 	});
@@ -90,7 +92,9 @@ DELETE	/tableName/id	Delete the line with the specified _id
 			});
 		}else{
 			res.send({
-				success: true
+				success: true,
+				data:   data.rows,
+				length: data.length
 			});
 		}
 	});
