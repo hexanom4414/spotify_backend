@@ -110,7 +110,7 @@ exports.addEvent = function(table,sport, field, date, email, callback){
 		}
 	});
 };
-exports.fetchFilteredTable = function(table,filter,arg){
+exports.fetchFilteredTable = function(table,filter,arg,callback){
 	var data = {};
 	pool.getConnection(function(err, connection) {
 		if (err) {
