@@ -99,6 +99,29 @@ DELETE	/tableName/id	Delete the line with the specified _id
 		}
 	});
 })
+
+.get('/fetch/:table/:join_table/:filter/:arg', function(req,res){
+	var table  = req.params.table,
+		filter = req.params.filter,
+		arg    = req.params.arg;
+		join_table  = req.params.join_table;
+
+	database.fetchFilteredFieldsWithJoinTable(table,join_table,filter,arg,function(err,data){
+		if(err){
+			res.statusCode = data.statusCode;
+			res.send({
+				success: false,
+				err:    err.code
+			});
+		}else{
+			res.send({
+				success: true,
+				data:   data.rows,
+				length: data.length
+			});
+		}
+	});
+})
 .post('/:table', urlencodedParser, function(req,res){
 	switch(req.params.table){
 		case users:
