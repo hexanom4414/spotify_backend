@@ -77,7 +77,7 @@ DELETE	/tableName/id	Delete the line with the specified _id
 	});
 })
 .get('/fetch/:table/:filter/:arg', function(req,res){
-	var table  = req.params.filter,
+	var table  = req.params.table,
 		filter = req.params.filter,
 		arg    = req.params.arg;
 
