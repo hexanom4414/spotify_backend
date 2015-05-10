@@ -129,6 +129,25 @@ exports.fetchFilteredTable = function(table,filter,arg,callback){
 		}
 	});
 };
+exports.fetchFilteredFieldsWithJoinTable = function(table,join_table,filter,arg, callback){
+	var data = {};
+	pool.getConnection(function(err, connection) {
+		if (err) {
+			errorConnection(err,data,function(err,data){callback(err,data);})
+		} else {
+			connection.query("SELECT * FROM "+table+","+join_table+" WHERE id=installationId AND "+filter+" = "+arg, function(err, rows, fields) {
+				if (err) {
+					errorQuery(err,data,function(err,data){callback(error,data);});
+				}else {
+					data.rows = rows;
+					data.length = rows.length;
+					connection.release();
+					callback(null,data);
+				}
+			});
+		}
+	});
+};
 
 exports.fetchElementById = function (table,id , callback){
 	var data = {};
