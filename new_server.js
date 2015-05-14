@@ -2,7 +2,7 @@ var express    = require('express'),
 	bodyParser = require('body-parser'),
 	database   = require("./database.js"),
 	app        = express(),
-	port       = 80;
+	port       = 8080;
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -71,13 +71,15 @@ DELETE	/tableName/id	Delete the line with the specified _id
 			});
 		}else{
 			res.send({
-				success: true
+				success: true,
+				data:   data.rows,
+				length: data.length
 			});
 		}
 	});
 })
 .get('/fetch/:table/:filter/:arg', function(req,res){
-	var table  = req.params.filter,
+	var table  = req.params.table,
 		filter = req.params.filter,
 		arg    = req.params.arg;
 
@@ -90,7 +92,32 @@ DELETE	/tableName/id	Delete the line with the specified _id
 			});
 		}else{
 			res.send({
-				success: true
+				success: true,
+				data:   data.rows,
+				length: data.length
+			});
+		}
+	});
+})
+
+.get('/fetch/:table/:join_table/:filter/:arg', function(req,res){
+	var table  = req.params.table,
+		filter = req.params.filter,
+		arg    = req.params.arg;
+		join_table  = req.params.join_table;
+
+	database.fetchFilteredFieldsWithJoinTable(table,join_table,filter,arg,function(err,data){
+		if(err){
+			res.statusCode = data.statusCode;
+			res.send({
+				success: false,
+				err:    err.code
+			});
+		}else{
+			res.send({
+				success: true,
+				data:   data.rows,
+				length: data.length
 			});
 		}
 	});
@@ -99,8 +126,8 @@ DELETE	/tableName/id	Delete the line with the specified _id
 	switch(req.params.table){
 		case users:
 			var u_email     = req.body.email,
-				u_firstname = req.body.firstname,
-				u_lastname  = req.body.lastname;
+				u_firstname = req.body.nom,
+				u_lastname  = req.body.prenom;
 
 			database.createUser(u_email,u_firstname,u_lastname, function(err,data){
 				if(err){
@@ -119,11 +146,11 @@ DELETE	/tableName/id	Delete the line with the specified _id
 		case events:
 			console.log(req.body);
 			var sport     = req.body.sportId,
-				field     = req.body.fieldId,
-				date      = req.body.date ? new Date().now() : new Date(req.body.date).getTime(),
+				field     = req.body.installationId,
+				date      = req.body.date ?   new Date(req.body.date).getTime() : new Date().getTime(),  //new date doesn't give the right format
 				emailUser = req.body.email ;
 
-			database.addEvent(table,sport,field,date,function(err,data){
+			database.addEvent(sport,field,date,emailUser,function(err,data){
 				if(err){
 					res.statusCode = data.statusCode;
 					res.send({
