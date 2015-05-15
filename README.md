@@ -1,6 +1,9 @@
 # sportify_backend
 BackEnd du projet Sportify
 
+### lancement serveur nodejs
+node new_server.js
+
 ### nodejs via forever
 sudo forever start /home/h4414/spotify_backend/new_server.js
 
