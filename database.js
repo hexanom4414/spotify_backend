@@ -177,7 +177,7 @@ exports.createUser = function (email,firstname,lastname, callback){
 			errorConnection(err,data,function(err,data){callback(err,data);});
 		} else {
 			var sQuery1 ="";
-			var sQuery2 ="SELECT * FROM utilisateur WHERE email ="+email;
+			var sQuery2 ="SELECT * FROM utilisateur WHERE email = '"+email+"'";
 
 			var q2_result;
 			sQuery1 = "INSERT INTO utilisateur (email, nom, prenom) \	VALUES ('"+email+"' ,'"+firstname+"','"+lastname+"')";
